@@ -13,9 +13,9 @@ class UserCreate(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    email: str | None = None
-    password: str | None = None
-    full_name: str | None = None
+    email: str 
+    password: str
+    full_name: str 
 
 
 @router.post("/users/")
