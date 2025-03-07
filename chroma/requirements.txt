@@ -1,0 +1,7 @@
+ctranslate2
+transformers
+torch
+numpy
+fastapi
+pydantic
+uvicorn
