@@ -1,86 +1,59 @@
-
-
-from database.mongodb import MongoManager
-from config import settings
 import hashlib
+from database.postgresdb import PostgresDB
+import smtplib
+from authorization.token_based import generate_access_token, generate_refresh_token, store_refresh_token
 
-mongo_client = MongoManager(settings.mongodb_timenest_db_name)
-def check_login(username, password):
-    if mongo_client.find_one('users', {'UserName': username}):
-        if mongo_client.find('users', {'UserName': username, 'Password': password}):
-            user = mongo_client.find_one('users',{'UserName': username})
-            userID = user['userID']
-            return {
-                "status": 200,
-                "message": "Login successful",
-                "userID": userID
-            }
-        else:
-            return {
-                "status": 200,
-                "message": "Wrong password"
-            }
-    else:
-        return {
-            "status":401,
-            "message": 'User not found, would you like to create an account?'
-        }
-
-def create_account(
-    username,
-    password,
-    confirm_password
-):
-    if not username or not password or not confirm_password:
-        return {
-            "status": 400,
-            "error": "All fields are required"
-        }
+def send_email(subject, message, user_email):
+    """Fake function gửi email"""
+    email = "timenest.notif@gmail.com"
+    receiver = user_email
     
+    text = f"Subject: {subject}\n\n{message}"
+    
+    server = smtplib.SMTP("smtp.gmail.com",587)
+    server.starttls()
+    server.login(email, "xnlgyvyzzgyclnkh")
+    server.sendmail(email,receiver,text)
+    print("📨 Email have sent to " + receiver)
+    # print(f"📨 Gửi email tới {user_email}: {subject} - {body}")
+
+def hash_password(password):
+    "Băm"
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def check_login(username: str, password: str):
+    hashed_password = hash_password(password)
+    with PostgresDB() as db:
+        user = db.select("users", {"username": username, "password": hashed_password})
+    if user:
+        access_token = generate_access_token(user[0])
+        refresh_token = generate_refresh_token(user[0])
+        
+        store_refresh_token(user[0]["userid"], refresh_token)
+        
+        return {
+            "status_code": 200, 
+            "info": user[0],
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer"
+        } 
+    return {"status_code": 400, "error": "Đéo xác thực được thằng lol này"}
+
+def create_account(username: str, password: str, confirm_password: str, email: str = None, full_name: str = None):
     if password != confirm_password:
-        return {
-            "status":400,
-            "error": "Passwords do not match"
-        }
+        return {"status_code": 400, "error": "❌ Mật khẩu xác nhận không khớp!"}
 
-    if mongo_client.find_one('users', {"UserName": username}):
-        return {
-            "status":400,
-            "error": "Username already exists"
-        }
-    userID = hashlib.md5("your_string_here".encode()).hexdigest()[:8](username)
+    hashed_password = hash_password(password)
 
-    # insert vao db 
-
-    # mongo_client.insert_one(
-    #     'users', 
-    #     {
-    #         "userid": userID,
-    #         "username": username, 
-    #         "password": password
-    #     }
-    # )
-    return {
-        "status": 201,
-        "message": "Account created successfully"
-    }
-
-def get_user_metadata(userID):
-    try:
-        metadata = mongo_client.find(
-            "users",
-            {
-                "userid":userID
-            }
-        )
-        return {
-            "status":200,
-            "message":{
-                "metadata":metadata
-            }
-        }
-    except Exception as e:
-        return {
-            'status':500,
-            'message':f'Internal server error: {e}'
-        }
+    with PostgresDB() as db:
+        try:
+            user = db.insert("users", {
+                "username": username,
+                "email": email,
+                "password": hashed_password,
+                "full_name": full_name
+            })
+            return {"status_code": 200, "message": "✅ Tạo tài khoản thành công!", "user": user}
+        except Exception as e:
+            return {"status_code": 500, "error": f"❌ Lỗi: {e}"}

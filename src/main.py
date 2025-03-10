@@ -1,5 +1,4 @@
 from config import settings
-
 def run_app_server():
     from uvicorn import run
 

@@ -19,4 +19,17 @@ class Settings:
         self.postgres_user = os.getenv("POSTGRES_USER")
         self.postgres_port = os.getenv("POSTGRES_PORT")
 
+        self.redis_url = os.getenv("REDIS_URL")
+        self.redis_port = os.getenv("REDIS_PORT")
+        self.redis_password = os.getenv("REDIS_PASSWORD")
+
+        self.google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+        self.google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+        self.secret_key = os.getenv("SECRET_KEY")
+        self.redirect_url = os.getenv("REDIRECT_URL")
+        self.frontend_url = os.getenv("FRONTEND_URL")
+        self.JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+        self.JWT_REFRESH_SECRET_KEY = os.getenv("JWT_REFRESH_SECRET_KEY")
+
+        self.security_on = True
 settings = Settings()
