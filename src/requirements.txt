@@ -9,3 +9,8 @@ python-dateutil
 Flask-SocketIO
 chromadb
 psycopg2-binary
+pydantic[email]
+authlib
+python-jose
+redis
+fastapi-jwt-auth

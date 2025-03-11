@@ -4,13 +4,13 @@ from config import settings
 
 class PostgresDB:
     def __init__(self):
-        """Khởi tạo kết nối tới database"""
         self.conn = psycopg2.connect(
             host=settings.postgres_client_url,
             port=settings.postgres_port,
             user=settings.postgres_user,
             password=settings.postgres_password,
             database="postgres",
+            cursor_factory=RealDictCursor
         )
         self.cur = self.conn.cursor()
 
@@ -23,7 +23,6 @@ class PostgresDB:
 
 
     def execute(self, query, params=None, fetch_one=False, fetch_all=False, commit=False):
-        """Thực thi truy vấn SQL"""
         try:
             self.cur.execute(query, params or ())
             if commit:
@@ -38,14 +37,13 @@ class PostgresDB:
             return None
 
     def insert(self, table, data):
-        """Chèn dữ liệu vào bảng"""
         keys = ', '.join(data.keys())
         values = ', '.join(['%s'] * len(data))
         query = f"INSERT INTO {table} ({keys}) VALUES ({values}) RETURNING *"
         return self.execute(query, tuple(data.values()), fetch_one=True, commit=True)
 
+
     def select(self, table, conditions=None):
-        """Truy vấn dữ liệu từ bảng"""
         query = f"SELECT * FROM {table}"
         params = []
         if conditions:
@@ -55,6 +53,5 @@ class PostgresDB:
         return self.execute(query, params, fetch_all=True)
 
     def close(self):
-        """Đóng kết nối"""
         self.cur.close()
         self.conn.close()

@@ -4,6 +4,8 @@ from typing import List, Optional
 from config import settings
 from database.mongodb import MongoManager
 from bson import ObjectId
+from authorization.token_based import get_current_user
+from config import settings
 
 def convert_objectid(doc):
     """Chuyển đổi ObjectId trong document thành string"""
@@ -25,7 +27,8 @@ class Knowledge(BaseModel):
     answer: str
 
 @router.get("/knowledges/query")
-def get_knowdlege_info():
+def get_knowdlege_info(current_user = Depends(get_current_user)):
+
     knowledge = mongo_client.find(
         "knowledge"
     )
@@ -36,7 +39,7 @@ def get_knowdlege_info():
     }
 
 @router.post("/knowledges/insert")
-def get_knowdlege_info(knowdlegde:Knowledge):
+def get_knowdlege_info(knowdlegde:Knowledge, current_user = Depends(get_current_user)):
     try:
         mongo_client.insert_one(
             "knowledge",

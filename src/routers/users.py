@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from database.postgresdb import PostgresDB
 from uuid import uuid4
+from authorization.token_based import get_current_user
 router = APIRouter(prefix='/sqldb', tags=["users"])
 
 
@@ -19,8 +20,7 @@ class UserUpdate(BaseModel):
 
 
 @router.post("/users/")
-def create_user(user: UserCreate):
-    """Thêm user vào database"""
+def create_user(user: UserCreate, current_user = Depends(get_current_user) ):
     user_info = user.dict()
     with PostgresDB() as db:
         result = db.insert("users", user_info)
@@ -30,26 +30,23 @@ def create_user(user: UserCreate):
 
 
 @router.get("/users/{user_id}")
-def get_user_by_id(user_id: int):
-    """Lấy thông tin user theo ID"""
+def get_user_by_id(user_id: str,current_user = Depends(get_current_user)):
     with PostgresDB() as db:
-        result = db.select("users", {"id": user_id})
+        result = db.select("users", {"userid": user_id})
     if result:
         return {"user": result[0]}
     raise HTTPException(status_code=404, detail="❌ User not found.")
 
 
 @router.get("/users/")
-def get_all_users():
-    """Lấy danh sách tất cả user"""
+def get_all_users(current_user = Depends(get_current_user)):
     with PostgresDB() as db:
         result = db.select("users")
     return {"users": result} if result else {"message": "No users found."}
 
 
 @router.put("/users/{user_id}")
-def update_user(user_id: int, user: UserUpdate):
-    """Cập nhật thông tin user"""
+def update_user(user_id: str, user: UserUpdate,current_user = Depends(get_current_user)):
     user_data = user.dict(exclude_unset=True)
     if not user_data:
         raise HTTPException(status_code=400, detail="❌ No data to update.")
@@ -66,8 +63,7 @@ def update_user(user_id: int, user: UserUpdate):
 
 
 @router.delete("/users/{user_id}")
-def delete_user(user_id: int):
-    """Xóa user theo ID"""
+def delete_user(user_id: str,current_user = Depends(get_current_user)):
     with PostgresDB() as db:
         result = db.execute("DELETE FROM users WHERE id = %s RETURNING *", (user_id,), fetch_one=True, commit=True)
 

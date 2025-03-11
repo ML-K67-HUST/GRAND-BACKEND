@@ -46,7 +46,7 @@ class MongoManager:
     # Updates a single document in the specified collection based on a filter
     def update_one(self, collection_name, filter, data):
         collection = self.__database[collection_name]
-        collection.update_one(filter, data)
+        collection.update_one(filter, data, upsert=True)
 
     # Updates multiple documents in the specified collection based on a filter
     def update_many(self, collection_name, filter, data):
