@@ -3,10 +3,11 @@ from authorization.check_user_login import (
     check_login, create_account, send_email, hash_password,
 )
 from authorization.token_based import (
-    verify_access_token, refresh_tokens
+    verify_access_token, refresh_tokens, generate_access_token, generate_refresh_token, store_refresh_token
 )
 from datetime import datetime, timedelta
 from fastapi import APIRouter, HTTPException, Depends, Header
+from fastapi.responses import Response
 from pydantic import BaseModel, EmailStr
 from database.postgresdb import PostgresDB
 from google.oauth2 import id_token
@@ -19,6 +20,8 @@ from typing import Optional
 from starlette.requests import Request
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from starlette.responses import RedirectResponse
+from urllib.parse import quote
+
 
 router = APIRouter(prefix='/authorization',tags=["authorization"])
 
@@ -85,10 +88,34 @@ async def auth(request: Request):
 
     user = token.get('userinfo')
     if user:
+        print(user)
         username = user.get('name')
         userID = user.get('sub')  # Google user ID
-        print(user)
-        return RedirectResponse(f"http://127.0.0.1:5001/calendar?username={username}&record={userID}")
+
+        # Encode username để tránh lỗi UnicodeEncodeError
+        encoded_username = quote(username)
+
+        user_data = {
+            "userid":userID,
+            "username": username,
+            "email":user.get("email"),
+            "password": "google_auth",
+            "full_name": user.get("name"),
+            "google_auth":"true"
+        }
+        access_token = generate_access_token(user_data, google_auth=True)
+        print('ACCESS TOKEN:\n',access_token)
+        refresh_token = generate_refresh_token(user_data)
+
+        # print('REFRESH TOKEN:\n', refresh_token)
+        store_refresh_token(user_id=userID, refresh_token=refresh_token)
+        
+        response = Response(status_code=302)
+        response.set_cookie(key="access_token", value=access_token, httponly=True)
+        response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="Lax")
+
+        response.headers["Location"] = f"http://127.0.0.1:5001/calendar?username={encoded_username}&record={userID}"
+        return response
 
     return {"error": "User info not found"}
 
@@ -178,24 +205,3 @@ def logout(request: RefreshTokenRequest):
         pass
     
     return {"status_code": 200, "message": "Logged out successfully"}
-
-class TokenData(BaseModel):
-    token: str
-
-@router.post("/callback")
-async def google_auth(data: TokenData):
-    try:
-        idinfo = id_token.verify_oauth2_token(
-            data.token, requests.Request(), settings.google_client_id
-        )
-
-        return {
-            "success": True,
-            "user": {
-                "name": idinfo["name"],
-                "email": idinfo["email"],
-                "picture": idinfo["picture"],
-            },
-        }
-    except Exception as e:
-        raise HTTPException(status_code=401, detail="Xác thực thất bại")

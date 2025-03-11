@@ -7,17 +7,19 @@ from config import settings
 from typing import Optional
 import uuid
 
-async def get_current_user(authorization: Optional[str] = Header(None)):
+async def get_current_user(authorization: Optional[str] = Header(None),google_auth: Optional[str] = Header(None)):
     if settings.security_on:
         if not authorization:
             raise HTTPException(status_code=401, detail="Missing authorization header")
         
         scheme, token = authorization.split()
+        print('token no doi verify\n')
+        print(token)
+        print('gg authen:\n', google_auth)
         if scheme.lower() != "bearer":
             raise HTTPException(status_code=401, detail="Invalid authentication scheme")
-        
-        payload = verify_access_token(token)
-        
+        payload = verify_access_token(token.strip("b'"))
+        print('payload parsed:\n',payload)
         if not payload:
             raise HTTPException(status_code=401, detail="Invalid token")
         
@@ -28,19 +30,53 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
         
         with PostgresDB() as db:
             user = db.select("users", {"userid": payload["sub"]})
+            email = db.select("users", {"email": payload["email"]})
+            if email:
+                return email[0]
             if not user:
-                raise HTTPException(status_code=404, detail="User not found")
+                if google_auth == "true":
+                    user = db.insert("users",{
+                        "userid": str(payload["sub"]),
+                        "username": payload["username"],
+                        "email": payload["email"],
+                        "password":payload["password"],
+                        "full_name":payload["full_name"],
+                        "google_auth": payload["google_auth"],
+                    })
+                    return {
+                        "userid": str(payload["sub"]),
+                        "username": payload["username"],
+                        "email": payload["email"],
+                        "password":payload["password"],
+                        "full_name":payload["full_name"],
+                        "google_auth": payload["google_auth"],
+                    }
+                else:
+                    raise HTTPException(status_code=404, detail="User not found")
         
         return user[0]
 
-def generate_access_token(user_data):
-    payload = {
-        "sub": str(user_data["userid"]),
-        "username": user_data["username"],
-        "exp": datetime.utcnow() + timedelta(minutes=30),
-        "iat": datetime.utcnow(),
-        "type": "access"
-    }
+def generate_access_token(user_data, google_auth=False):
+    if google_auth:
+        payload = {
+            "sub": str(user_data["userid"]),
+            "username": user_data["username"],
+            "email": user_data["email"],
+            "password":user_data["password"],
+            "full_name":user_data["full_name"],
+            "google_auth": user_data["google_auth"],
+            "exp": datetime.utcnow() + timedelta(minutes=30),
+            "iat": datetime.utcnow(),
+            "type": "access"
+        }
+    else:
+        payload = {
+            "sub": str(user_data["userid"]),
+            "username": user_data["username"],
+            "exp": datetime.utcnow() + timedelta(minutes=30),
+            "iat": datetime.utcnow(),
+            "type": "access"
+        }
     return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm="HS256")
 
 def generate_refresh_token(user_data):
@@ -79,7 +115,6 @@ def verify_access_token(token):
             settings.JWT_SECRET_KEY, 
             algorithms=["HS256"]
         )
-        
         if payload.get("type") != "access":
             return None
             

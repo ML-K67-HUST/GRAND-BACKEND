@@ -21,7 +21,6 @@ class UserUpdate(BaseModel):
 
 @router.post("/users/")
 def create_user(user: UserCreate, current_user = Depends(get_current_user) ):
-    """Thêm user vào database"""
     user_info = user.dict()
     with PostgresDB() as db:
         result = db.insert("users", user_info)
@@ -31,10 +30,9 @@ def create_user(user: UserCreate, current_user = Depends(get_current_user) ):
 
 
 @router.get("/users/{user_id}")
-def get_user_by_id(user_id: int,current_user = Depends(get_current_user)):
-    """Lấy thông tin user theo ID"""
+def get_user_by_id(user_id: str,current_user = Depends(get_current_user)):
     with PostgresDB() as db:
-        result = db.select("users", {"id": user_id})
+        result = db.select("users", {"userid": user_id})
     if result:
         return {"user": result[0]}
     raise HTTPException(status_code=404, detail="❌ User not found.")
@@ -42,15 +40,13 @@ def get_user_by_id(user_id: int,current_user = Depends(get_current_user)):
 
 @router.get("/users/")
 def get_all_users(current_user = Depends(get_current_user)):
-    """Lấy danh sách tất cả user"""
     with PostgresDB() as db:
         result = db.select("users")
     return {"users": result} if result else {"message": "No users found."}
 
 
 @router.put("/users/{user_id}")
-def update_user(user_id: int, user: UserUpdate,current_user = Depends(get_current_user)):
-    """Cập nhật thông tin user"""
+def update_user(user_id: str, user: UserUpdate,current_user = Depends(get_current_user)):
     user_data = user.dict(exclude_unset=True)
     if not user_data:
         raise HTTPException(status_code=400, detail="❌ No data to update.")
@@ -67,8 +63,7 @@ def update_user(user_id: int, user: UserUpdate,current_user = Depends(get_curren
 
 
 @router.delete("/users/{user_id}")
-def delete_user(user_id: int,current_user = Depends(get_current_user)):
-    """Xóa user theo ID"""
+def delete_user(user_id: str,current_user = Depends(get_current_user)):
     with PostgresDB() as db:
         result = db.execute("DELETE FROM users WHERE id = %s RETURNING *", (user_id,), fetch_one=True, commit=True)
 

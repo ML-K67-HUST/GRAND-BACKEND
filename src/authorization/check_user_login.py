@@ -26,14 +26,20 @@ def check_login(username: str, password: str):
     with PostgresDB() as db:
         user = db.select("users", {"username": username, "password": hashed_password})
     if user:
-        access_token = generate_access_token(user[0])
-        refresh_token = generate_refresh_token(user[0])
+        print('TT DE GEN TOKEN:\n')
+        print(user[0])
+        data = {
+            "userid": user[0]['userid'],
+            "username":user[0]['username']
+        }
+        access_token = generate_access_token(data)
+        refresh_token = generate_refresh_token(data)
         
         store_refresh_token(user[0]["userid"], refresh_token)
         
         return {
             "status_code": 200, 
-            "info": user[0],
+            "info": data,
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer"

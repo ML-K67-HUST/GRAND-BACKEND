@@ -42,6 +42,7 @@ class PostgresDB:
         query = f"INSERT INTO {table} ({keys}) VALUES ({values}) RETURNING *"
         return self.execute(query, tuple(data.values()), fetch_one=True, commit=True)
 
+
     def select(self, table, conditions=None):
         query = f"SELECT * FROM {table}"
         params = []

@@ -8,7 +8,7 @@ router = APIRouter(prefix='/sqldb', tags=["tasks"])
 
 
 class Task(BaseModel):
-    userid : int
+    userid : str
     task_name : str 
     task_description : str 
     start_time : int
@@ -21,7 +21,6 @@ class Task(BaseModel):
 
 @router.post("/tasks/")
 def create_task(task: Task, current_user = Depends(get_current_user)):
-    """Thêm task vào database"""
     task_info = task.dict()
     with PostgresDB() as db:
         result = db.insert("tasks", task_info)
@@ -31,19 +30,23 @@ def create_task(task: Task, current_user = Depends(get_current_user)):
 
 
 @router.get("/tasks/{user_id}")
-def get_user_by_id(user_id: int,current_user = Depends(get_current_user)):
-    """Lấy thông tin user theo ID"""
+def get_user_by_id(user_id: str,current_user = Depends(get_current_user)):
     with PostgresDB() as db:
         result = db.select("tasks", {"userid": user_id})
     if result:
-        return {"tasks": result}
+        return {
+            "userid": user_id,
+            "tasks": result
+        }
     else:
-        return {"tasks": []}
+        return {
+            "userid":user_id,
+            "tasks": []
+        }
 
 
 @router.delete("/tasks/{user_id}/{task_id}")
-def delete_task(user_id: int, task_id: str,current_user = Depends(get_current_user)):
-    """Xóa task theo ID và user ID"""
+def delete_task(user_id: str, task_id: str,current_user = Depends(get_current_user)):
     with PostgresDB() as db:
         result = db.execute(
             "DELETE FROM tasks WHERE userid = %s AND taskid = %s RETURNING *",
