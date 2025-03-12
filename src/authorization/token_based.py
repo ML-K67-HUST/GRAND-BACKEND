@@ -30,12 +30,17 @@ async def get_current_user(authorization: Optional[str] = Header(None),google_au
         
         with PostgresDB() as db:
             user = db.select("users", {"userid": payload["sub"]})
-            email = db.select("users", {"email": payload["email"]})
-            if email:
-                return email[0]
+            print(user)
             if not user:
                 if google_auth == "true":
-                    user = db.insert("users",{
+                    try:
+                        
+                        email = db.select("users", {"email": payload.get("email","")})
+                    except:
+                        email = {}
+                    if email:
+                        return email[0]
+                    db.insert("users",{
                         "userid": str(payload["sub"]),
                         "username": payload["username"],
                         "email": payload["email"],

@@ -31,5 +31,5 @@ class Settings:
         self.JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
         self.JWT_REFRESH_SECRET_KEY = os.getenv("JWT_REFRESH_SECRET_KEY")
 
-        self.security_on = True
+        self.security_on = False
 settings = Settings()
