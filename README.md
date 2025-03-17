@@ -5,7 +5,7 @@
 run backend:
 ```
 cd src/
-docker-compose up --build
+docker-compose up -d --scale app=3
 ```
 
 
