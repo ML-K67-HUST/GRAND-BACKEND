@@ -82,7 +82,8 @@ jobs:
       env:
         FLY_API_TOKEN: ${{ secrets.FLYCTL_ACCESS_TOKEN }}
       run: |
-        flyctl apps create grand-backend --org personal || true
+        flyctl auth login "${{ secrets.FLYCTL_ACCESS_TOKEN }}"
+        flyctl apps create grand-backend || true
         
         flyctl secrets set TOGETHER_AI_API_KEY="${{ secrets.TOGETHER_AI_API_KEY }}" --app grand-backend
         flyctl secrets set AWS_POSTGRES_URL="${{ secrets.AWS_POSTGRES_URL }}" --app grand-backend
