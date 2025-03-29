@@ -49,7 +49,7 @@ jobs:
         POSTGRES_PASSWORD: maythangml
         POSTGRES_DB: TIMENEST
         POSTGRES_PORT: 5432
-        MONGODB_URL: ${{ secrets.MONGDB_URL }}
+        MONGODB_URL: ${{ secrets.MONGODB_URL }}
         MONGDB_TIMENEST_DN_NAME: TIMENEST
         MAILGUN_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
         GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
