@@ -52,6 +52,13 @@ class PostgresDB:
             params = list(conditions.values())
         return self.execute(query, params, fetch_all=True)
 
+    def update(self, table, data, conditions):
+        set_clause = ", ".join(f"{k} = %s" for k in data.keys())
+        where_clause = " AND ".join(f"{k} = %s" for k in conditions.keys())
+        query = f"UPDATE {table} SET {set_clause} WHERE {where_clause} RETURNING *"
+        params = list(data.values()) + list(conditions.values())
+        return self.execute(query, params, fetch_one=True, commit=True)
+
     def close(self):
         self.cur.close()
         self.conn.close()
