@@ -80,10 +80,8 @@ jobs:
     - name: Deploy to fly.io
       working-directory: ./src
       env:
-        FLYCTL_ACCESS_TOKEN: ${{ secrets.FLYCTL_ACCESS_TOKEN }}
+        FLY_API_TOKEN: ${{ secrets.FLYCTL_ACCESS_TOKEN }}
       run: |
-        flyctl auth token ${{ secrets.FLYCTL_ACCESS_TOKEN }}
-
         flyctl apps create grand-backend --no-remote || true
 
         flyctl secrets set TOGETHER_AI_API_KEY="${{ secrets.TOGETHER_AI_API_KEY }}"
