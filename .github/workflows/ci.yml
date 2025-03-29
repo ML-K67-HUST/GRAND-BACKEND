@@ -34,11 +34,13 @@ jobs:
         python-version: '3.9'
         
     - name: Install dependencies
+      working-directory: ./src
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         
     - name: Run tests
+      working-directory: ./src
       env:
         TOGETHER_AI_API_KEY: ${{ secrets.TOGETHER_AI_API_KEY }}
         AWS_POSTGRES_URL: localhost
