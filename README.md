@@ -5,12 +5,20 @@
 run backend:
 ```
 cd src/
-docker-compose up -d --scale app=3
+bash run.sh
 ```
 
 
 access endpoint `localhost:5050/docs` to start use/test this backend api
 
-grafana : `localhost:3000`
-prometheus : `localhost:9090`
+for scalable:
+```
+bash run.sh --scale=True
+```
 
+then access `localhost:80/docs`
+
+for deployment:
+```
+bash deploy.sh
+```
