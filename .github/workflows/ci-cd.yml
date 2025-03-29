@@ -83,27 +83,25 @@ jobs:
         FLY_API_TOKEN: ${{ secrets.FLYCTL_ACCESS_TOKEN }}
       run: |
         flyctl auth login "${{ secrets.FLYCTL_ACCESS_TOKEN }}"
-        flyctl apps create grand-backend || true
         
-        flyctl secrets set TOGETHER_AI_API_KEY="${{ secrets.TOGETHER_AI_API_KEY }}" --app grand-backend
-        flyctl secrets set AWS_POSTGRES_URL="${{ secrets.AWS_POSTGRES_URL }}" --app grand-backend
-        flyctl secrets set POSTGRES_USER="${{ secrets.POSTGRES_USER }}" --app grand-backend
-        flyctl secrets set POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" --app grand-backend
-        flyctl secrets set POSTGRES_DB="${{ secrets.POSTGRES_DB }}" --app grand-backend
-        flyctl secrets set POSTGRES_PORT="${{ secrets.POSTGRES_PORT }}" --app grand-backend
-        flyctl secrets set MONGODB_URL="${{ secrets.MONGDB_URL }}" --app grand-backend
-        flyctl secrets set MONGDB_TIMENEST_DN_NAME="${{ secrets.MONGDB_TIMENEST_DN_NAME }}" --app grand-backend
-        flyctl secrets set MAILGUN_API_KEY="${{ secrets.MAILGUN_API_KEY }}" --app grand-backend
-        flyctl secrets set GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" --app grand-backend
-        flyctl secrets set GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" --app grand-backend
-        flyctl secrets set SECRET_KEY="${{ secrets.SECRET_KEY }}" --app grand-backend
-        flyctl secrets set REDIRECT_URL="${{ secrets.REDIRECT_URL }}" --app grand-backend
-        flyctl secrets set FRONTEND_URL="${{ secrets.FRONTEND_URL }}" --app grand-backend
-        flyctl secrets set JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" --app grand-backend
-        flyctl secrets set JWT_REFRESH_SECRET_KEY="${{ secrets.JWT_REFRESH_SECRET_KEY }}" --app grand-backend
-        flyctl secrets set REDIS_URL="${{ secrets.REDIS_URL }}" --app grand-backend
-        flyctl secrets set REDIS_PORT="${{ secrets.REDIS_PORT }}" --app grand-backend
-        flyctl secrets set REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}" --app grand-backend
+        flyctl secrets set TOGETHER_AI_API_KEY="${{ secrets.TOGETHER_AI_API_KEY }}"
+        flyctl secrets set AWS_POSTGRES_URL="${{ secrets.AWS_POSTGRES_URL }}"
+        flyctl secrets set POSTGRES_USER="${{ secrets.POSTGRES_USER }}"
+        flyctl secrets set POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
+        flyctl secrets set POSTGRES_DB="${{ secrets.POSTGRES_DB }}"
+        flyctl secrets set POSTGRES_PORT="${{ secrets.POSTGRES_PORT }}"
+        flyctl secrets set MONGODB_URL="${{ secrets.MONGDB_URL }}"
+        flyctl secrets set MONGDB_TIMENEST_DN_NAME="${{ secrets.MONGDB_TIMENEST_DN_NAME }}"
+        flyctl secrets set MAILGUN_API_KEY="${{ secrets.MAILGUN_API_KEY }}"
+        flyctl secrets set GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}"
+        flyctl secrets set GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}"
+        flyctl secrets set SECRET_KEY="${{ secrets.SECRET_KEY }}"
+        flyctl secrets set REDIRECT_URL="${{ secrets.REDIRECT_URL }}"
+        flyctl secrets set FRONTEND_URL="${{ secrets.FRONTEND_URL }}"
+        flyctl secrets set JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"
+        flyctl secrets set JWT_REFRESH_SECRET_KEY="${{ secrets.JWT_REFRESH_SECRET_KEY }}"
+        flyctl secrets set REDIS_URL="${{ secrets.REDIS_URL }}"
+        flyctl secrets set REDIS_PORT="${{ secrets.REDIS_PORT }}"
+        flyctl secrets set REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}"
 
-        # Deploy with app name specified
-        flyctl deploy --app grand-backend
+        flyctl deploy
