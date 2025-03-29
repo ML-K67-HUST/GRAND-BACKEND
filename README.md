@@ -1,5 +1,12 @@
 # GRAND-BACKEND
 
+## Basic architecutre
+
+### Authorization workflow
+
+![authorization](./assets/authorization.png "Authorization workflow")
+
+
 ## Development Setup
 
 1. Clone the repository
