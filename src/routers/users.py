@@ -24,8 +24,9 @@ def create_user(user: UserCreate, current_user = Depends(get_current_user) ):
     user_info = user.dict()
     with PostgresDB() as db:
         result = db.insert("users", user_info)
+        user = db.select("users", {"username": user_info["username"]})
     if result:
-        return {"message": "✅ User created!", "user": result}
+        return {"message": "✅ User created!", "user": user[0]}
     raise HTTPException(status_code=400, detail="❌ Could not create user.")
 
 

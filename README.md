@@ -1,5 +1,19 @@
 # GRAND-BACKEND
 
+This repository contains the core of the TIMENEST application. It is part of a microservices architecutre, with other repositories working together to form the complete system.
+
+Other repo:
+
+FRONTEND: https://github.com/ML-K67-HUST/GRAND-FRONTEND
+
+AGENT: https://github.com/ML-K67-HUST/TIME-MANAGEMENT-AGENT
+
+VECTOR STORE: https://github.com/ML-K67-HUST/TIMENEST-VECTOR-STORE
+
+DATA GENERATION: https://github.com/ML-K67-HUST/TIMENEST-DATALAB
+
+MESSAGE BROKER: https://github.com/ML-K67-HUST/TIMENEST-MESSAGE-BROKER
+
 ## Basic architecutre
 
 ### Authorization workflow
