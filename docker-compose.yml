@@ -1,0 +1,97 @@
+services:
+  # Database service
+  db:
+    image: postgres:15-alpine
+    container_name: timenest_db
+    environment:
+      POSTGRES_DB: timenest
+      POSTGRES_USER: timenest
+      POSTGRES_PASSWORD: timenest_password_123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - timenest_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U timenest -d timenest"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend application
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: timenest_backend
+    ports:
+      - "5050:5050"
+    environment:
+      # Application Settings
+      APP_NAME: "TimeNest Backend"
+      ENVIRONMENT: development
+      DEBUG: "true"
+      LOG_LEVEL: INFO
+      HOST: "0.0.0.0"
+      PORT: 5050
+      
+      # Database Configuration
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: timenest
+      POSTGRES_PASSWORD: timenest_password_123
+      POSTGRES_DB: timenest
+      
+      # Database Pool Configuration
+      DB_POOL_SIZE: 10
+      DB_MAX_OVERFLOW: 20
+      DB_POOL_TIMEOUT: 30
+      DB_POOL_RECYCLE: 3600
+      
+      # Redis Configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      
+      # Security Configuration
+      JWT_SECRET_KEY: "your-super-secret-jwt-key-for-development-only-32-chars-min"
+      JWT_REFRESH_SECRET_KEY: "your-different-refresh-secret-key-for-dev-only-32-chars"
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      JWT_REFRESH_TOKEN_EXPIRE_DAYS: 7
+      
+      SECRET_KEY: "your-application-secret-key-for-development-32-chars-minimum"
+      CORS_ORIGINS: '["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5050"]'
+      
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - timenest_network
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  # Redis for caching (optional for future)
+  redis:
+    image: redis:7-alpine
+    container_name: timenest_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - timenest_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  timenest_network:
+    driver: bridge 

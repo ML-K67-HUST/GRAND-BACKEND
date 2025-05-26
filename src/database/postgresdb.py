@@ -9,7 +9,7 @@ class PostgresDB:
             port=settings.postgres_port,
             user=settings.postgres_user,
             password=settings.postgres_password,
-            database="postgres",
+            database=settings.postgres_db,
             cursor_factory=RealDictCursor
         )
         self.cur = self.conn.cursor()

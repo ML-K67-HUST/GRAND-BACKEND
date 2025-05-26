@@ -8,7 +8,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE tasks (
-    userid UUID NOT NULL,
+    userid SERIAL NOT NULL,
     taskid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     taskname TEXT NOT NULL,
     taskdescription TEXT NOT NULL,
@@ -21,9 +21,9 @@ CREATE TABLE tasks (
 
 CREATE TABLE password_reset_otp (
     id SERIAL PRIMARY KEY,
-    userid INT NOT NULL,
+    userid SERIAL NOT NULL,
     otp VARCHAR(6) NOT NULL,
-    expires_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at INT NOT NULL,
+    created_at INT DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (userid) REFERENCES users(userid) ON DELETE CASCADE
 );

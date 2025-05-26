@@ -18,6 +18,7 @@ class Settings:
         self.postgres_password = os.getenv("POSTGRES_PASSWORD")
         self.postgres_user = os.getenv("POSTGRES_USER")
         self.postgres_port = os.getenv("POSTGRES_PORT")
+        self.postgres_db = os.getenv("POSTGRES_DB")
 
         self.redis_url = os.getenv("REDIS_URL")
         self.redis_port = os.getenv("REDIS_PORT")

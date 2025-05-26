@@ -26,6 +26,8 @@ def create_user(user: UserCreate, current_user = Depends(get_current_user) ):
         result = db.insert("users", user_info)
         user = db.select("users", {"username": user_info["username"]})
     if result:
+        print(result)
+        print(user)
         return {"message": "✅ User created!", "user": user[0]}
     raise HTTPException(status_code=400, detail="❌ Could not create user.")
 
